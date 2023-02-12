@@ -86,7 +86,7 @@ fun MyComponent(message: MyMessage) {
     pero que no está cuando el mismo usuario envía sucesivos mensajes. */
 
     val colorMessage = if (message.localMessage) Color(0xFF5ad6c4) else Color(0xFF88af5e)
-    
+
     var showDate by remember { mutableStateOf(false) }
     var leftUpperCorner by remember { mutableStateOf(18.dp) }
     var rightUpperCorner by remember { mutableStateOf(18.dp) }
