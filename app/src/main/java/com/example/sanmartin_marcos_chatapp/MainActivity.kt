@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sanmartin_marcos_chatapp.ui.theme.Sanmartin_Marcos_ChatAppTheme
 
@@ -26,8 +25,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Sanmartin_Marcos_ChatAppTheme {
-
-
                 // A surface container using the 'background' color from the theme
                 Surface(
 //                    modifier = Modifier.fillMaxSize(),
@@ -53,6 +50,34 @@ class MainActivity : ComponentActivity() {
                         ) {
 
                             paddingValues.calculateBottomPadding()
+
+                            // Indicar si el mensaje es el primero
+                            var countLocalMessages = 0
+                            var remoteLocalMessages = 0
+//                            var arrayMessages = ArrayList<Boolean>()
+
+                            for (message in messages) {
+
+                                if (message.localMessage) {
+//                                    if(countLocalMessages == 0) message.isFirstMessage = true
+//                                    else message.isFirstMessage = false
+                                    message.isFirstMessage = countLocalMessages == 0 // Mejorado con el IDE
+                                    countLocalMessages++
+                                    remoteLocalMessages = 0
+                                } else {
+//                                    if(remoteLocalMessages == 0) message.isFirstMessage = true
+//                                    else message.isFirstMessage = false
+                                    message.isFirstMessage = remoteLocalMessages == 0 // Mejorado con el IDE
+                                    remoteLocalMessages++
+                                    countLocalMessages = 0
+                                }
+
+                            }
+
+//                            messages.forEachIndexed { index, message ->
+//                                message.isFirstMessage = arrayMessages[index]
+//                            }
+
                             items(messages) { message ->
                                 MyComponent(message)
                             }
@@ -66,19 +91,6 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    Sanmartin_Marcos_ChatAppTheme {
-        Greeting("Android")
-    }
-}
-
-@Composable
 fun MyComponent(message: MyMessage) {
 
     /* Los mensajes del usuario local aparecen a la derecha y los del remoto a la izquierda. Además, 
@@ -86,18 +98,19 @@ fun MyComponent(message: MyMessage) {
     pero que no está cuando el mismo usuario envía sucesivos mensajes. */
 
     val colorMessage = if (message.localMessage) Color(0xFF5ad6c4) else Color(0xFF88af5e)
-    
+
     var showDate by remember { mutableStateOf(false) }
     var leftUpperCorner by remember { mutableStateOf(18.dp) }
     var rightUpperCorner by remember { mutableStateOf(18.dp) }
 
-    if (message.localMessage) {
-        leftUpperCorner = 18.dp
-        rightUpperCorner = 0.dp
-
-    } else {
-        leftUpperCorner = 0.dp
-        rightUpperCorner = 18.dp
+    if (message.isFirstMessage) {
+        if (message.localMessage) {
+            leftUpperCorner = 18.dp
+            rightUpperCorner = 0.dp
+        } else {
+            leftUpperCorner = 0.dp
+            rightUpperCorner = 18.dp
+        }
     }
 
     Row(
@@ -112,12 +125,14 @@ fun MyComponent(message: MyMessage) {
                 .clickable(onClick = {
                     showDate = !showDate
                 }),
-            shape = RoundedCornerShape(leftUpperCorner, rightUpperCorner, 18.dp, 18.dp)
+            shape = RoundedCornerShape(leftUpperCorner, rightUpperCorner, 18.dp, 18.dp),
+            backgroundColor = colorMessage,
+            elevation = 5.dp
         ) {
 
             Column(
                 Modifier
-                    .background(colorMessage)
+//                    .background(colorMessage)
                     .padding(15.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -149,7 +164,8 @@ data class MyMessage(
     var body: String,
     val localMessage: Boolean,
     val date: String,
-    val showDate: Boolean? = false
+    val showDate: Boolean? = false,
+    var isFirstMessage: Boolean = false
 )
 
 val messages: List<MyMessage> = listOf(
